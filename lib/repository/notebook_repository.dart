@@ -38,10 +38,14 @@ class NotebookRepository {
   // Load semua notebooks dari SharedPreferences
   static Future<List<Notebook>> loadNotebooks() async {
     try {
+      print('DEBUG: Attempting to load notebooks from Storage...');
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_notebooksKey);
       
+      print('DEBUG: Found data in storage: ${jsonString != null}');
+      
       if (jsonString == null || jsonString.isEmpty) {
+        print('DEBUG: No saved notebooks found.');
         return []; // Return empty list jika tidak ada data
       }
       
