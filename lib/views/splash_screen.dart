@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/animated_background.dart';
-import '../themes/app_colors.dart';
+import '../provider/notebook_provider.dart';
 import 'notebook_creator_screen.dart';
-import '../themes/app_gradients.dart';
-import '../themes/app_shadows.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     
@@ -31,21 +28,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _controller.forward();
     
-    // Navigate after animation
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const NotebookCreatorScreen(),
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        ),
-      );
-    });
+    // Load data and navigate after animation
+    _initApp();
+  }
+
+  Future<void> _initApp() async {
+    // Artificial minimum delay for splash animation
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
+    
+    // Load persisted data
+    await NotebookService.loadNotebooks(NotebookProvider.of(context));
+    
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const NotebookCreatorScreen()),
+    );
   }
 
   @override
@@ -56,63 +57,55 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Center(
-          child: ScaleTransition(
-            scale: _animation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Holographic Logo
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppGradients.neonCyber,
-                    boxShadow: AppShadows.neonGlow,
-                  ),
-                  child: const Icon(
-                    Icons.lightbulb_outline,
-                    size: 60,
-                    color: Colors.white,
-                  ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      body: Center(
+        child: ScaleTransition(
+          scale: _animation,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 30),
-                // Animated Title
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _animation.value,
-                      child: Transform.translate(
-                        offset: Offset(0, 50 * (1 - _animation.value)),
-                        child: const Text(
-                          'NEURAL NOTEBOOK',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textNeon,
-                            letterSpacing: 4,
-                          ),
+                child: Icon(
+                  Icons.book_rounded,
+                  size: 40,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _animation.value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - _animation.value)),
+                      child: const Text(
+                        'Notebook Ide',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Think Beyond Dimensions',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ],
-            ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),

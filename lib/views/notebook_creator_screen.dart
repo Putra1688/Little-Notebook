@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/data_layer.dart';
 import '../provider/notebook_provider.dart';
-import '../widgets/animated_background.dart';
 import '../widgets/glassmorphic_card.dart';
-import '../widgets/holographic_button.dart';
-import '../themes/app_colors.dart';
-import '../themes/app_gradients.dart';
-import '../themes/app_shadows.dart';
 import 'notebook_screen.dart';
+import '../main.dart'; // Import for ThemeController
 
 class NotebookCreatorScreen extends StatefulWidget {
   const NotebookCreatorScreen({super.key});
@@ -16,27 +12,30 @@ class NotebookCreatorScreen extends StatefulWidget {
   State<NotebookCreatorScreen> createState() => _NotebookCreatorScreenState();
 }
 
-class _NotebookCreatorScreenState extends State<NotebookCreatorScreen> 
+class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
     with SingleTickerProviderStateMixin {
   final textController = TextEditingController();
   late AnimationController _animationController;
-  late Animation<double> _floatAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(seconds: 4),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
-    )..repeat(reverse: true);
-    
-    _floatAnimation = Tween<double>(
-      begin: -10,
-      end: 10,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<double>(begin: 50, end: 0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
+
+    _animationController.forward();
   }
 
   @override
@@ -48,114 +47,298 @@ class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBackground(
-      child: Scaffold(
+    final colorScheme = Theme.of(context).colorScheme;
+    final themeController = ThemeController();
+    
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('Creative Space'),
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: AnimatedBuilder(
-            animation: _floatAnimation,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                colorScheme.surface.withOpacity(0.9),
+                colorScheme.surface.withOpacity(0.0),
+              ],
+            ),
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          AnimatedBuilder(
+            animation: themeController,
             builder: (context, child) {
-              return Transform.translate(
-                offset: Offset(0, _floatAnimation.value),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.psychology, color: AppColors.primaryNeon),
-                    SizedBox(width: 12),
-                    Text(
-                      'NEURAL NOTEBOOK',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ],
-                ),
+              return IconButton(
+                icon: Icon(themeController.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+                onPressed: themeController.toggleTheme,
+                tooltip: 'Toggle Theme',
               );
             },
           ),
+        ],
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.surface,
+              colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              colorScheme.primaryContainer.withOpacity(0.1),
+            ],
+          ),
         ),
-        body: Column(
-          children: [
-            // Creator Card
-            AnimatedBuilder(
-              animation: _floatAnimation,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, _floatAnimation.value),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: GlassmorphicCard(
-                      blur: 25,
-                      borderRadius: 25,
-                      child: Column(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Creator Section
+              _buildCreatorSection(),
+              
+              const SizedBox(height: 24),
+              
+              // Notebooks List
+              Expanded(
+                child: _buildNotebookGrid(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreatorSection() {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _slideAnimation.value),
+          child: Opacity(
+            opacity: _fadeAnimation.value,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: GlassmorphicCard(
+                blur: 20,
+                borderRadius: 24,
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        Theme.of(context).colorScheme.tertiary.withOpacity(0.05),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.add_circle, color: AppColors.accentNeon),
-                              SizedBox(width: 10),
-                              Text(
-                                'Create New Dimension',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
+                          Icon(
+                            Icons.auto_awesome_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 24,
                           ),
-                          const SizedBox(height: 15),
-                          TextField(
-                            controller: textController,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Enter dimension name...',
-                              hintStyle: TextStyle(
-                                color: AppColors.textSecondary.withOpacity(0.7),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: AppColors.glassWhite.withOpacity(0.1),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 18,
-                              ),
-                            ),
-                            onEditingComplete: addNotebook,
-                          ),
-                          const SizedBox(height: 15),
-                          HolographicButton(
-                            onPressed: addNotebook,
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.auto_awesome, size: 20),
-                                SizedBox(width: 8),
-                                Text(
-                                  'CREATE DIMENSION',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(width: 12),
+                          Text(
+                            'Create New Notebook',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: textController,
+                        style: const TextStyle(fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: 'What are you thinking about?',
+                          hintStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface.withOpacity(0.7),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.arrow_forward_rounded),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            onPressed: addNotebook,
+                          ),
+                        ),
+                        onSubmitted: (_) => addNotebook(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNotebookGrid() {
+    ValueNotifier<List<Notebook>> notebookNotifier = NotebookProvider.of(context);
+
+    return ValueListenableBuilder<List<Notebook>>(
+      valueListenable: notebookNotifier,
+      builder: (context, notebooks, child) {
+        if (notebooks.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(20),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: notebooks.length,
+          itemBuilder: (context, index) {
+            final nb = notebooks[index];
+            // Staggered animation effect
+            return AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                final double start = 0.2 + (index * 0.1).clamp(0.0, 0.5);
+                final double end = (start + 0.4).clamp(0.0, 1.0);
+                
+                final animation = CurvedAnimation(
+                  parent: _animationController,
+                  curve: Interval(start, end, curve: Curves.easeOutBack),
+                );
+
+                return Transform.scale(
+                  scale: animation.value,
+                  child: Opacity(
+                    opacity: animation.value,
+                    child: child,
                   ),
                 );
               },
+              child: _buildNotebookCard(nb),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildNotebookCard(Notebook notebook) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return GlassmorphicCard(
+      blur: 15,
+      borderRadius: 20,
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => NotebookScreen(notebook: notebook),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.surfaceContainerLow.withOpacity(0.8),
+              colorScheme.surfaceContainer.withOpacity(0.4),
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.menu_book_rounded,
+                color: colorScheme.onPrimaryContainer,
+                size: 20,
+              ),
             ),
-            Expanded(child: _buildNotebookList()),
+            const Spacer(),
+            Text(
+              notebook.title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${notebook.ideaCount} ideas',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.library_books_rounded,
+              size: 80,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Notebooks Yet',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Start your journey by creating\nyour first notebook above.",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),
@@ -163,197 +346,30 @@ class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
   }
 
   void addNotebook() {
-    final text = textController.text;
-    if (text.isEmpty) return;
+    final text = textController.text.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please give your notebook a name'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
     final notebook = Notebook(title: text, ideas: []);
     NotebookService.addNotebook(NotebookProvider.of(context), notebook);
 
     textController.clear();
-    FocusScope.of(context).requestFocus(FocusNode());
-    
-    // Haptic feedback
-    _showCreationEffect();
-  }
+    FocusScope.of(context).unfocus();
 
-  void _showCreationEffect() {
-    showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      builder: (context) {
-        Future.delayed(const Duration(milliseconds: 800), () {
-          Navigator.of(context).pop();
-        });
-        
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.accentNeon.withOpacity(0.8),
-                  AppColors.primaryNeon.withOpacity(0.4),
-                  Colors.transparent,
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentNeon.withOpacity(0.6),
-                  blurRadius: 50,
-                  spreadRadius: 20,
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.auto_awesome,
-              size: 60,
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNotebookList() {
-    ValueNotifier<List<Notebook>> notebookNotifier = NotebookProvider.of(context);
-    List<Notebook> notebooks = notebookNotifier.value;
-
-    if (notebooks.isEmpty) {
-      return Center(
-        child: GlassmorphicCard(
-          blur: 15,
-          borderRadius: 20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.auto_awesome_outlined,
-                size: 80,
-                color: AppColors.textSecondary.withOpacity(0.5),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'No Dimensions Created',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Create your first dimension to start organizing ideas',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textSecondary.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 15,
-          mainAxisSpacing: 15,
-          childAspectRatio: 0.8,
-        ),
-        itemCount: notebooks.length,
-        itemBuilder: (context, index) {
-          final nb = notebooks[index];
-          return _buildNotebookCard(nb, index);
-        },
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Notebook "$text" created!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        behavior: SnackBarBehavior.floating,
       ),
-    );
-  }
-
-  Widget _buildNotebookCard(Notebook notebook, int index) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        final scale = 1.0 + (_floatAnimation.value * 0.002);
-        return Transform.scale(
-          scale: scale,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => NotebookScreen(notebook: notebook),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
-                ),
-              );
-            },
-            child: GlassmorphicCard(
-              blur: 20,
-              borderRadius: 20,
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Notebook Icon
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.neonCyber,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: AppShadows.neonGlow,
-                    ),
-                    child: Icon(
-                      Icons.folder_special,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  // Notebook Title
-                  Text(
-                    notebook.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  // Info
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.glassBlue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${notebook.ideaCount} ideas',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.primaryNeon,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

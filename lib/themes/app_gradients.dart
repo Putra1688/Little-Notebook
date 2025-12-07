@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
 
 class AppGradients {
-  static const LinearGradient cosmicHorizon = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [AppColors.deepSpace, AppColors.cosmicPurple, AppColors.nebulaBlue],
-  );
+  static LinearGradient primaryGradient(BuildContext context) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Theme.of(context).colorScheme.primary,
+        Theme.of(context).colorScheme.primaryContainer,
+      ],
+    );
+  }
   
-  static const LinearGradient neonCyber = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [AppColors.primaryNeon, AppColors.secondaryNeon],
-  );
+  static LinearGradient secondaryGradient(BuildContext context) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Theme.of(context).colorScheme.secondary,
+        Theme.of(context).colorScheme.secondaryContainer,
+      ],
+    );
+  }
   
-  static const LinearGradient glassEffect = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [AppColors.glassWhite, AppColors.glassPurple],
-  );
-  
-  static const RadialGradient hologram = RadialGradient(
-    center: Alignment.center,
-    radius: 1.5,
-    colors: [
-      AppColors.primaryNeon,
-      AppColors.secondaryNeon,
-      Colors.transparent,
-    ],
-  );
+  static LinearGradient surfaceGradient(BuildContext context) {
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Theme.of(context).colorScheme.surface.withOpacity(0.8),
+        Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.6),
+      ],
+    );
+  }
 }
