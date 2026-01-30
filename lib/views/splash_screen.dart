@@ -91,17 +91,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 builder: (context, child) {
                   return Opacity(
                     opacity: _animation.value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - _animation.value)),
-                      child: const Text(
-                        'Notebook Ide',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Lil Notebook',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Sesuatu yang besar dimulai dari tumpukan ide kecil',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withOpacity(0.8),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
                   );
                 },
               ),

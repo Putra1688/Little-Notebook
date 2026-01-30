@@ -53,7 +53,22 @@ class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Creative Space'),
+        title: Column(
+          children: [
+            const Text(
+              'Creative Space',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Created to Save Your Idead',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                fontSize: 10,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -252,64 +267,189 @@ class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return GlassmorphicCard(
-      blur: 15,
-      borderRadius: 20,
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => NotebookScreen(notebook: notebook),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GlassmorphicCard(
+            blur: 15,
+            borderRadius: 20,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => NotebookScreen(notebook: notebook),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colorScheme.surfaceContainerLow.withOpacity(0.8),
+                    colorScheme.surfaceContainer.withOpacity(0.4),
+                  ],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      color: colorScheme.onPrimaryContainer,
+                      size: 20,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    notebook.title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${notebook.ideaCount} ideas',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.surfaceContainerLow.withOpacity(0.8),
-              colorScheme.surfaceContainer.withOpacity(0.4),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Material(
+            color: Colors.transparent,
+            child: IconButton(
+              onPressed: () => _showDeleteNotebookConfirmation(context, notebook),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                size: 20,
+                color: colorScheme.error.withOpacity(0.7),
+              ),
+              tooltip: 'Delete Notebook',
+              splashRadius: 20,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showDeleteNotebookConfirmation(BuildContext context, Notebook notebook) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Notebook?'),
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete "${notebook.title}"?',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              if (notebook.ideas.isNotEmpty) ...[
+                const Text('This notebook contains the following ideas:'),
+                const SizedBox(height: 8),
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 150),
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                    ),
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: notebook.ideas.length,
+                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final idea = notebook.ideas[index];
+                      final text = idea.text.trim().isNotEmpty
+                          ? idea.text.trim()
+                          : 'Untitled Idea';
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          '• $text',
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'These ideas will be permanently deleted.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ] else
+                const Text('This notebook is empty.'),
             ],
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.menu_book_rounded,
-                color: colorScheme.onPrimaryContainer,
-                size: 20,
-              ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
-            const Spacer(),
-            Text(
-              notebook.title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                height: 1.2,
+            FilledButton(
+              onPressed: () {
+                _deleteNotebook(notebook);
+                Navigator.of(context).pop();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${notebook.ideaCount} ideas',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              child: const Text('Delete'),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
+  }
+
+  void _deleteNotebook(Notebook notebook) {
+    final notifier = NotebookProvider.of(context);
+    final notebooks = notifier.value;
+    final index = notebooks.indexOf(notebook);
+
+    if (index != -1) {
+      NotebookService.deleteNotebook(notifier, index);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Notebook "${notebook.title}" deleted'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Widget _buildEmptyState() {
