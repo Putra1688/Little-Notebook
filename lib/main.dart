@@ -24,7 +24,8 @@ class ThemeController extends ChangeNotifier {
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 
   void toggleTheme() {
-    _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    _themeMode =
+        _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
   }
 }
@@ -77,7 +78,7 @@ class _MasterNotebookAppState extends State<MasterNotebookApp> {
         secondary: const Color(0xFF00C4CC), // Teal accent
       ),
       useMaterial3: true,
-      fontFamily: 'Roboto', 
+      fontFamily: 'Roboto',
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: Color(0xFF1A1C1E),
