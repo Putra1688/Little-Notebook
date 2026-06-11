@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import './models/notebook.dart';
 import './provider/notebook_provider.dart';
 import './views/splash_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) {
+    MobileAds.instance.initialize();
+  }
   runApp(
     NotebookProvider(
       notifier: ValueNotifier<List<Notebook>>([]),

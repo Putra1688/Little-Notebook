@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../provider/notebook_provider.dart';
 import '../widgets/glassmorphic_card.dart';
 import 'idea_editor_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/foundation.dart';
 
 class NotebookScreen extends StatefulWidget {
   final Notebook notebook;
@@ -13,6 +15,47 @@ class NotebookScreen extends StatefulWidget {
 }
 
 class _NotebookScreenState extends State<NotebookScreen> {
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
+  final String _adUnitId = kIsWeb 
+      ? '' 
+      : (defaultTargetPlatform == TargetPlatform.android
+          ? 'ca-app-pub-3940256099942544/6300978111'
+          : 'ca-app-pub-3940256099942544/2934735716');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  void _loadAd() {
+    if (kIsWeb) return;
+    
+    _bannerAd = BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     ValueNotifier<List<Notebook>> notebookNotifier = NotebookProvider.of(
@@ -76,6 +119,15 @@ class _NotebookScreenState extends State<NotebookScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: _isAdLoaded && _bannerAd != null
+          ? SafeArea(
+              child: SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            )
+          : null,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _createNewIdea(context),
         label: const Text('New Idea'),
