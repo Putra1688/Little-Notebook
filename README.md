@@ -1,11 +1,11 @@
-# 📝 Little-Notebook (buku_kecilku) - Informatics Technical Overview
+# 📝 ChapterIt (chapter_it) - Informatics Technical Overview
 
 [![Framework](https://img.shields.io/badge/Framework-Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Language](https://img.shields.io/badge/Language-Dart-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![State](https://img.shields.io/badge/State-ValueNotifier-6B4EE6?logo=dart&logoColor=white)](https://api.flutter.dev/flutter/foundation/ValueNotifier-class.html)
 [![Persistence](https://img.shields.io/badge/Persistence-Shared__Preferences-FFCA28?logo=google-chrome&logoColor=black)](https://pub.dev/packages/shared_preferences)
 
-**Little-Notebook** (buku_kecilku) is a mobile-first digital annotation platform engineered with a focus on low-latency state synchronization and robust local persistence. The project demonstrates advanced usage of Flutter's reactive primitives to maintain a unidirectional data flow without external state management overhead.
+**ChapterIt** (chapter_it) is a mobile-first digital annotation platform engineered with a focus on low-latency state synchronization and robust local persistence. The app acts as an organizer for random thoughts and ideas, allowing users to categorize and group them into chapters. The project demonstrates advanced usage of Flutter's reactive primitives to maintain a unidirectional data flow without external state management overhead.
 
 ---
 

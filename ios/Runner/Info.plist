@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Buku Kecilku</string>
+	<string>ChapterIt</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>buku_kecilku</string>
+	<string>chapter_it</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -46,6 +46,6 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-7882096835336060~4504591484</string>
 </dict>
 </plist>

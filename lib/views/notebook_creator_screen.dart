@@ -27,8 +27,8 @@ class _NotebookCreatorScreenState extends State<NotebookCreatorScreen>
   final String _adUnitId = kIsWeb 
       ? '' 
       : (defaultTargetPlatform == TargetPlatform.android
-          ? 'ca-app-pub-3940256099942544/6300978111'
-          : 'ca-app-pub-3940256099942544/2934735716');
+          ? 'ca-app-pub-7882096835336060/3462972551'
+          : 'ca-app-pub-7882096835336060/3462972551');
 
   @override
   void initState() {

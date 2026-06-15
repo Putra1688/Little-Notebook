@@ -95,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Text(
-                            'Lil Notebook',
+                            'ChapterIt',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
